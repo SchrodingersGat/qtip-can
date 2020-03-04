@@ -21,34 +21,3 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 **/
-
-
-#ifndef QTIPCAN_H
-#define QTIPCAN_H
-
-#include <qcanbus.h>
-
-
-
-
-class QTipCANDevice : public QCanBusDevice
-{
-    Q_OBJECT
-
-public:
-    QTipCANDevice(QObject *parent = nullptr);
-
-    virtual ~QTipCANDevice();
-
-    static QCanBusDeviceInfo getDeviceInfo(const QString name);
-
-    virtual bool writeFrame(const QCanBusFrame &frame) override;
-    virtual void setConfigurationParameter(int key, const QVariant &value) override;
-    virtual QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
-
-protected:
-    virtual bool open() override;
-    virtual void close() override;
-};
-
-#endif // QTIPCAN_H

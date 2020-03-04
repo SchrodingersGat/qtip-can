@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<Protocol name="QTip" prefix="QTIP_" api="1" version="1.0.0"
+          supportSpecialFloat="false" supportInt64="false" supportFloat64="false"
+          endian="big" file="QTipPackets" pointer="QTIP_Packet_t">
+
+    <Include name="qtippacket.h"/>
+
+    <Documentation paragraph="1" comment="This protocol defines the serialization of CAN packets over the QTipCAN link. QTipCAN provides a virtual CAN device over a TCP interface, allowing drop-in support for applications built on Qt."/>
+
+    <Documentation paragraph="1" comment="High level enumerations"/>
+
+    <Enum name="QTipPackets" prefix="PKT_QTIP_" lookup="true">
+        <Value name="CAN_FRAME" value="0x10" comment="Serialized CAN packet"/>
+    </Enum>
+
+    <Enum name="QTipFrameTypes" prefix="CAN_FRAME_" comment="CAN frame types">
+
+        <Value name="NONE" value="0"/>
+
+        <Value name="DATA" value="1"/>
+        <Value name="ERROR"/>
+        <Value name="RTR"/>
+        <Value name="UNKNOWN"/>
+
+    </Enum>
+
+    <Documentation paragraph="1" comment="QTip Packets"/>
+
+    <Packet name="CANFrame" id="PKT_QTIP_CAN_FRAME" comment="Serialized CAN data">
+
+        <!-- CAN frame modifier bits -->
+        <Data name="ext" inMemoryType="bitfield1" comment="0 = Std Id, 1 = Ext Id"/>
+        <Data name="frameType" inMemoryType="bitfield2" comment="CAN frame type"/>
+        <Data name="hasTimestamp" inMemoryType="bitfield1" comment="1 if the packet contains timestamp information"/>
+
+        <Data name="idHi" inMemoryType="unsigned16" dependsOn="ext" comment="CAN frame ID (upper bytes)"/>
+        <Data name="idLo" inMemoryType="unsigned16" comment="CAN frame ID (lower bytes)"/>
+        <Data name="dlc" inMemoryType="unsigned8" comment="CAN data length code"/>
+        <Data name="timestamp" inMemoryType="unsigned32" dependsOn="hasTimestamp" comment="CAN frame timestamp"/>
+        <Data name="data" inMemoryType="unsigned8" array="64" variableArray="dlc"/>
+
+    </Packet>
+
+</Protocol>

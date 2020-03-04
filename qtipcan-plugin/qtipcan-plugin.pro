@@ -28,14 +28,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += ../src \
                ../inc \
+               ../protocol \
 
 
 SOURCES += \
+        ../protocol/QTipProtocol.c \
+        ../protocol/fielddecode.c \
+        ../protocol/fieldencode.c \
+        ../protocol/QTipPackets.c \
+        ../protocol/scaleddecode.c \
+        ../protocol/scaledencode.c \
         ../src/qtipcan.cpp \
         qtipcanplugin.cpp
 
 HEADERS += \
         ../inc/qtipcan.h \
+        ../inc/qtippacket.h \
+        ../protocol/QTipProtocol.h \
+        ../protocol/fielddecode.h \
+        ../protocol/fieldencode.h \
+        ../protocol/QTipPackets.h \
+        ../protocol/scaleddecode.h \
+        ../protocol/scaledencode.h \
         qtipcanplugin.h \
         qtipcan-plugin_global.h 
 

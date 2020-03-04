@@ -23,32 +23,26 @@ SOFTWARE.
 **/
 
 
-#ifndef QTIPCAN_H
-#define QTIPCAN_H
+#ifndef QTIPPACKET_H
+#define QTIPPACKET_H
 
-#include <qcanbus.h>
+#include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-
-
-class QTipCANDevice : public QCanBusDevice
+// Structure for serialization of QTip packet data
+typedef struct
 {
-    Q_OBJECT
+    uint16_t id;            //!< Packet identifier
+    uint16_t length;        //!< Length of packet data (bytes)
+    uint8_t data[128];      //!< Raw packet data
+} QTIP_Packet_t;
 
-public:
-    QTipCANDevice(QObject *parent = nullptr);
 
-    virtual ~QTipCANDevice();
+#ifdef __cplusplus
+}
+#endif
 
-    static QCanBusDeviceInfo getDeviceInfo(const QString name);
-
-    virtual bool writeFrame(const QCanBusFrame &frame) override;
-    virtual void setConfigurationParameter(int key, const QVariant &value) override;
-    virtual QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
-
-protected:
-    virtual bool open() override;
-    virtual void close() override;
-};
-
-#endif // QTIPCAN_H
+#endif // QTIPPACKET_H

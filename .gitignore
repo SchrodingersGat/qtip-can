@@ -3,5 +3,11 @@ qtipcan-plugin/debug
 qtipcan-plugin/release
 qtipcan-plugin/Makefile*
 
+*.Debug
+*.Release
 *.stash
 *.user
+
+# Generated files
+protocol/html
+*.db

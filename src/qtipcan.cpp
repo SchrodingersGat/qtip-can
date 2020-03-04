@@ -25,6 +25,9 @@ SOFTWARE.
 
 #include "qtipcan.h"
 
+#include "QTipProtocol.h"
+#include "QTipPackets.h"
+
 
 QTipCANDevice::QTipCANDevice(QObject *parent) : QCanBusDevice(parent)
 {
@@ -64,9 +67,43 @@ void QTipCANDevice::close()
 
 bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
 {
-    // TODO
+    QTIP_CANFrame_t qtipFrame;
 
-    Q_UNUSED(frame);
+    memset(&qtipFrame, 0, sizeof(qtipFrame));
+
+    auto payload = frame.payload();
+
+    int n = payload.size();
+
+    // Restrict maximum CAN frame size
+    if (n > 64) n = 64;
+
+    qtipFrame.dlc = n;
+
+    // Copy packet data
+    for (int ii = 0; ii < n; ii++)
+    {
+        qtipFrame.data[ii] = payload.at(ii);
+    }
+
+    qtipFrame.ext = frame.hasExtendedFrameFormat();
+
+    // Ignore timestamp for now...
+    qtipFrame.hasTimestamp = 0;
+
+    qtipFrame.frameType = frame.frameType();
+
+    qtipFrame.idHi = frame.frameId() >> 16;
+    qtipFrame.idLo = frame.frameId() && 0xFFFF;
+
+    QTIP_Packet_t pkt;
+
+    encodeQTIP_CANFramePacketStructure(&pkt, &qtipFrame);
+
+    // TODO - Transmit the newly encoded frame
+
+    // TODO - Return success code
+    return false;
 }
 
 
@@ -83,4 +120,40 @@ QString QTipCANDevice::interpretErrorFrame(const QCanBusFrame &errorFrame)
     // TODO
 
     return QString();
+}
+
+
+//! \return the packet data pointer from the packet
+uint8_t* getQTipPacketData(QTIP_Packet_t* pkt)
+{
+    return pkt->data;
+}
+
+
+//! \return the packet data pointer from the packet, const
+const uint8_t* getQTipPacketDataConst(const QTIP_Packet_t* pkt)
+{
+    return (const uint8_t*) pkt->data;
+}
+
+
+//! Complete a packet after the data have been encoded
+void finishQTipPacket(QTIP_Packet_t* pkt, int size, uint32_t packetID)
+{
+    pkt->length = size;
+    pkt->id = packetID;
+}
+
+
+//! \return the size of a packet from the packet header
+int getQTipPacketSize(const QTIP_Packet_t* pkt)
+{
+    return pkt->length;
+}
+
+
+//! \return the ID of a packet from the packet header
+uint32_t getQTipPacketID(const QTIP_Packet_t* pkt)
+{
+    return pkt->id;
 }
