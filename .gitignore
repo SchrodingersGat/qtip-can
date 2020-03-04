@@ -1,0 +1,7 @@
+# Build files
+qtipcan-plugin/debug
+qtipcan-plugin/release
+qtipcan-plugin/Makefile*
+
+*.stash
+*.user
