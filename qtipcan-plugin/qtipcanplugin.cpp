@@ -34,7 +34,7 @@ QList<QCanBusDeviceInfo> QTipCANPlugin::availableDevices(QString *errorMessage) 
     QList<QCanBusDeviceInfo> devices;
 
     // TODO - Actually list proper devices?
-    devices.append(QTipCANDevice::getDeviceInfo("12345"));
+    devices.append(QTipCANDevice::getDeviceInfo("Port " + QString::number(QTipCANDevice::DEFAULT_PORT_NUM)));
 
     return devices;
 }
@@ -42,7 +42,16 @@ QList<QCanBusDeviceInfo> QTipCANPlugin::availableDevices(QString *errorMessage) 
 
 QCanBusDevice* QTipCANPlugin::createDevice(const QString &interfaceName, QString *errorMessage) const
 {
-    // TODO
+    auto* dev = new QTipCANDevice();
 
-    return new QTipCANDevice();
+    bool ok = false;
+
+    int portNum = interfaceName.split(" ").last().toInt(&ok);
+
+    if (ok)
+    {
+        dev->setPortNumber(portNum);
+    }
+
+    return dev;
 }

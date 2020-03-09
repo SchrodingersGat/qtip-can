@@ -23,29 +23,29 @@ SOFTWARE.
 **/
 
 
-#include <qdebug.h>
-
 #include "qtipcan.h"
 
 #include "QTipProtocol.h"
 #include "QTipPackets.h"
 
 
+/**
+ * @brief QTipCANDevice::QTipCANDevice - Create a new QTipCANDevice object
+ * @param parent
+ */
 QTipCANDevice::QTipCANDevice(QObject *parent) : QCanBusDevice(parent)
 {
+    portNum = DEFAULT_PORT_NUM;
+
     server.setMaxPendingConnections(10);
 
     // TDOO - Initialization
-
-    qDebug() << "QTipCANDevice()";
 }
 
 
 QTipCANDevice::~QTipCANDevice()
 {
     close();
-
-    qDebug() << "~QTipCANDevice()";
 }
 
 
@@ -57,6 +57,11 @@ QCanBusDeviceInfo QTipCANDevice::getDeviceInfo(const QString name)
 }
 
 
+/**
+ * @brief QTipCANDevice::open - Open the CAN connection.
+ * This starts a TCP server listening on the configured port.
+ * @return true if the connection was successfully opened
+ */
 bool QTipCANDevice::open()
 {
     if (state() != QCanBusDevice::UnconnectedState)
@@ -68,12 +73,15 @@ bool QTipCANDevice::open()
 
     connect(&server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 
-    qDebug() << "connection opened";
+    setState(QCanBusDevice::ConnectedState);
 
     return true;
 }
 
 
+/**
+ * @brief QTipCANDevice::close - Shut down the TCP server and disconnect any open connections
+ */
 void QTipCANDevice::close()
 {
     for (auto* connection : connections)
@@ -89,17 +97,62 @@ void QTipCANDevice::close()
     server.close();
 
     setState(QCanBusDevice::UnconnectedState);
-
-    qDebug() << "connection closed";
 }
 
 
+/**
+ * @brief QTipCANDevice::onNewConnection - Callback when a new TCP socket is opened
+ */
 void QTipCANDevice::onNewConnection()
 {
-    qDebug() << "new connection";
+    auto* connection = server.nextPendingConnection();
+
+    if (connection != nullptr)
+    {
+        connections.append(connection);
+
+        // TODO - Create a new connectionmanager object for tracking packets, etc
+    }
+
+    flushConnections();
 }
 
 
+/**
+ * @brief QTipCANDevice::flushConnections - Delete any disconnected or invalid connections.
+ * Call periodically to ensure that any dead connections are removed.
+ */
+void QTipCANDevice::flushConnections()
+{
+    int idx = 0;
+
+    while (idx < connections.count())
+    {
+        auto* connection = connections.at(idx);
+
+        if (connection == nullptr)
+        {
+            connections.removeAt(idx);
+            continue;
+        }
+
+        if (!connection->isOpen())
+        {
+            delete connection;
+            connections.removeAt(idx);
+            continue;
+        }
+
+        idx++;
+    }
+}
+
+
+/**
+ * @brief QTipCANDevice::writeFrame - Send a QCanBusFrame to all connected sockets
+ * @param frame - QCanBusFrame to write
+ * @return
+ */
 bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
 {
     QTIP_CANFrame_t qtipFrame;
@@ -145,7 +198,12 @@ bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
 }
 
 
-void QTipCANDevice::sendPacketToConnection(QTIP_Packet_t &pkt, QTcpSocket *connection)
+/**
+ * @brief QTipCANDevice::sendPacketToConnection - Transmit packet to a single connected socket
+ * @param pkt - reference to the packet being transmitted
+ * @param connection - pointer to the socket connection
+ */
+void QTipCANDevice::sendPacketToConnection(const QTIP_Packet_t &pkt, QTcpSocket *connection)
 {
     if (!connection || !connection->isOpen())
     {

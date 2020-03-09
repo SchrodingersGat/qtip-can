@@ -52,6 +52,8 @@ public:
     int getPortNumber(void) const { return portNum; }
     void setPortNumber(int n) { portNum = n; }
 
+    static const int DEFAULT_PORT_NUM = 99999;
+
 protected slots:
     void onNewConnection();
 
@@ -59,10 +61,11 @@ protected:
     virtual bool open() override;
     virtual void close() override;
 
-    void sendPacketToConnection(QTIP_Packet_t &pkt, QTcpSocket* connection);
+    void sendPacketToConnection(const QTIP_Packet_t &pkt, QTcpSocket* connection);
+    void flushConnections(void);
 
     //! Default port number
-    int portNum = 99999;
+    int portNum;
 
     //! TCP server for accepting remote connections
     QTcpServer server;
