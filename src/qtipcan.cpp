@@ -23,6 +23,8 @@ SOFTWARE.
 **/
 
 
+#include <qdebug.h>
+
 #include "qtipcan.h"
 
 #include "QTipProtocol.h"
@@ -31,13 +33,19 @@ SOFTWARE.
 
 QTipCANDevice::QTipCANDevice(QObject *parent) : QCanBusDevice(parent)
 {
+    server.setMaxPendingConnections(10);
+
     // TDOO - Initialization
+
+    qDebug() << "QTipCANDevice()";
 }
 
 
 QTipCANDevice::~QTipCANDevice()
 {
-    // TODO
+    close();
+
+    qDebug() << "~QTipCANDevice()";
 }
 
 
@@ -51,17 +59,44 @@ QCanBusDeviceInfo QTipCANDevice::getDeviceInfo(const QString name)
 
 bool QTipCANDevice::open()
 {
-    // TODO
+    if (state() != QCanBusDevice::UnconnectedState)
+    {
+        close();
+    }
 
-    return false;
+    server.listen(QHostAddress::Any, portNum);
+
+    connect(&server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+
+    qDebug() << "connection opened";
+
+    return true;
 }
 
 
 void QTipCANDevice::close()
 {
-    // TODO
+    for (auto* connection : connections)
+    {
+        if (connection && connection->isOpen())
+        {
+            connection->close();
+        }
+    }
+
+    qDeleteAll(connections);
+
+    server.close();
 
     setState(QCanBusDevice::UnconnectedState);
+
+    qDebug() << "connection closed";
+}
+
+
+void QTipCANDevice::onNewConnection()
+{
+    qDebug() << "new connection";
 }
 
 
@@ -100,10 +135,24 @@ bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
 
     encodeQTIP_CANFramePacketStructure(&pkt, &qtipFrame);
 
-    // TODO - Transmit the newly encoded frame
+    for (auto* connection : connections)
+    {
+        sendPacketToConnection(pkt, connection);
+    }
 
     // TODO - Return success code
-    return false;
+    return true;
+}
+
+
+void QTipCANDevice::sendPacketToConnection(QTIP_Packet_t &pkt, QTcpSocket *connection)
+{
+    if (!connection || !connection->isOpen())
+    {
+        return;
+    }
+
+    // TODO - Encode and send the packet...
 }
 
 

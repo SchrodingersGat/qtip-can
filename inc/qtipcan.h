@@ -27,7 +27,10 @@ SOFTWARE.
 #define QTIPCAN_H
 
 #include <qcanbus.h>
+#include <qtcpserver.h>
+#include <qtcpsocket.h>
 
+#include "qtippacket.h"
 
 
 
@@ -46,9 +49,26 @@ public:
     virtual void setConfigurationParameter(int key, const QVariant &value) override;
     virtual QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
+    int getPortNumber(void) const { return portNum; }
+    void setPortNumber(int n) { portNum = n; }
+
+protected slots:
+    void onNewConnection();
+
 protected:
     virtual bool open() override;
     virtual void close() override;
+
+    void sendPacketToConnection(QTIP_Packet_t &pkt, QTcpSocket* connection);
+
+    //! Default port number
+    int portNum = 99999;
+
+    //! TCP server for accepting remote connections
+    QTcpServer server;
+
+    //! List of connected socket objects
+    QList<QTcpSocket*> connections;
 };
 
 #endif // QTIPCAN_H
