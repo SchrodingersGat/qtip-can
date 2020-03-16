@@ -32,6 +32,7 @@ QTipCANConnection::QTipCANConnection(QTipCANDevice *d, QTcpSocket *s) : QTcpSock
 {
     connect(socket, SIGNAL(readyRead()), this, SLOT(onBytesAvailable()));
 
+    connect(this, SIGNAL(packetReceived(QTIP_Packet_t)), device, SLOT(onNewPacket(QTIP_Packet_t)));
     connect(this, SIGNAL(disconnected()), device, SLOT(flushConnections()));
 
     // Open the socket
@@ -49,6 +50,16 @@ QTipCANConnection::~QTipCANConnection()
 }
 
 
+bool QTipCANConnection::sendPacket(QTIP_Packet_t &pkt)
+{
+    QByteArray bytes;
+
+    // TODO - Encode the packet into the bytes
+
+    return write(bytes) == bytes.count();
+}
+
+
 void QTipCANConnection::onBytesAvailable()
 {
     auto bytes = socket->readAll();
@@ -60,5 +71,16 @@ void QTipCANConnection::onBytesAvailable()
 void QTipCANConnection::parseData(QByteArray &bytes)
 {
     QTipDebug() << bytes;
+
+    QTIP_Packet_t pkt;
+
+    bool result = false;
+
+    // TODO - Check the bytes and see if a packet has been received
+
+    if (result)
+    {
+        emit packetReceived(pkt);
+    }
 }
 

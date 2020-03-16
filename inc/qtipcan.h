@@ -58,6 +58,7 @@ public slots:
 
 protected slots:
     void onNewConnection();
+    void onNewPacket(QTIP_Packet_t packet);
 
 protected:
     virtual bool open() override;

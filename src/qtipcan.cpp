@@ -132,6 +132,12 @@ void QTipCANDevice::onNewConnection()
 }
 
 
+void QTipCANDevice::onNewPacket(QTIP_Packet_t packet)
+{
+    QTipDebug() << "QTipCANDevice::onNewPacket";
+}
+
+
 /**
  * @brief QTipCANDevice::flushConnections - Delete any disconnected or invalid connections.
  * Call periodically to ensure that any dead connections are removed.

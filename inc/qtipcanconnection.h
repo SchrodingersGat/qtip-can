@@ -28,6 +28,7 @@ SOFTWARE.
 
 
 #include <qtcpsocket.h>
+#include "qtippacket.h"
 
 
 class QTipCANDevice;
@@ -39,6 +40,12 @@ class QTipCANConnection : public QTcpSocket
 public:
     QTipCANConnection(QTipCANDevice *device, QTcpSocket *socket);
     virtual ~QTipCANConnection();
+
+public slots:
+    bool sendPacket(QTIP_Packet_t &pkt);
+
+signals:
+    void packetReceived(QTIP_Packet_t pkt);
 
 protected:
     QTipCANDevice *device = nullptr;
