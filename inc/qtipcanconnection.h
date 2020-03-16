@@ -38,10 +38,13 @@ class QTipCANConnection : public QTcpSocket
 
 public:
     QTipCANConnection(QTipCANDevice *device, QTcpSocket *socket);
+    virtual ~QTipCANConnection();
 
 protected:
     QTipCANDevice *device = nullptr;
     QTcpSocket *socket = nullptr;
+
+    void parseData(QByteArray &bytes);
 
 protected slots:
     void onBytesAvailable();

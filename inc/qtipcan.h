@@ -33,7 +33,6 @@ SOFTWARE.
 #include "qtippacket.h"
 #include "qtipcanconnection.h"
 
-
 class QTipCANDevice : public QCanBusDevice
 {
     Q_OBJECT
@@ -54,6 +53,9 @@ public:
 
     static const int DEFAULT_PORT_NUM = 13579;
 
+public slots:
+    void flushConnections();
+
 protected slots:
     void onNewConnection();
 
@@ -62,7 +64,6 @@ protected:
     virtual void close() override;
 
     void sendPacketToConnection(const QTIP_Packet_t &pkt, QTcpSocket* connection);
-    void flushConnections(void);
 
     //! Default port number
     int portNum;

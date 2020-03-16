@@ -25,13 +25,27 @@ SOFTWARE.
 
 #include "qtipcanconnection.h"
 #include "qtipcan.h"
-
-#include <qdebug.h>
+#include "qtipdebug.h"
 
 
 QTipCANConnection::QTipCANConnection(QTipCANDevice *d, QTcpSocket *s) : QTcpSocket(), device(d), socket(s)
 {
     connect(socket, SIGNAL(readyRead()), this, SLOT(onBytesAvailable()));
+
+    connect(this, SIGNAL(disconnected()), device, SLOT(flushConnections()));
+
+    // Open the socket
+    open(OpenModeFlag::ReadWrite);
+
+    QTipDebug() << "Creating new QTipCANConnection";
+}
+
+
+QTipCANConnection::~QTipCANConnection()
+{
+    QTipDebug() << "Deleting QTipCANConnection";
+
+    if (isOpen()) close();
 }
 
 
@@ -39,9 +53,12 @@ void QTipCANConnection::onBytesAvailable()
 {
     auto bytes = socket->readAll();
 
-    qDebug() << "bytes:" << bytes;
+    parseData(bytes);
+}
 
-    // Echo the bytes back
-    socket->write(bytes);
+
+void QTipCANConnection::parseData(QByteArray &bytes)
+{
+    QTipDebug() << bytes;
 }
 

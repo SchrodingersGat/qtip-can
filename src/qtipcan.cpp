@@ -28,6 +28,7 @@ SOFTWARE.
 #include "QTipProtocol.h"
 #include "QTipPackets.h"
 
+#include "qtipdebug.h"
 
 /**
  * @brief QTipCANDevice::QTipCANDevice - Create a new QTipCANDevice object
@@ -39,6 +40,8 @@ QTipCANDevice::QTipCANDevice(QObject *parent) : QCanBusDevice(parent)
 
     server.setMaxPendingConnections(10);
 
+    QTipDebug() << "QTipCANDevice()";
+
     // TDOO - Initialization
 }
 
@@ -46,6 +49,15 @@ QTipCANDevice::QTipCANDevice(QObject *parent) : QCanBusDevice(parent)
 QTipCANDevice::~QTipCANDevice()
 {
     close();
+
+    flushConnections();
+
+    for (auto *connection : connections)
+    {
+        if (connection) connection->close();
+    }
+
+    QTipDebug() << "~QTipCANDevice()";
 }
 
 
@@ -107,6 +119,8 @@ void QTipCANDevice::onNewConnection()
 {
     auto* socket= server.nextPendingConnection();
 
+    QTipDebug() << "QTip - New connection recevied";
+
     if (socket != nullptr)
     {
         QTipCANConnection* connection = new QTipCANConnection(this, socket);
@@ -126,19 +140,18 @@ void QTipCANDevice::flushConnections()
 {
     int idx = 0;
 
+    QTipDebug() << "flushing connections";
+
     while (idx < connections.count())
     {
         auto* connection = connections.at(idx);
 
-        if (connection == nullptr)
+        if (!connection || !connection->isOpen())
         {
-            connections.removeAt(idx);
-            continue;
-        }
+            QTipDebug() << "Removing old connection";
 
-        if (!connection->isOpen())
-        {
-            delete connection;
+            if (connection) delete connection;
+
             connections.removeAt(idx);
             continue;
         }
