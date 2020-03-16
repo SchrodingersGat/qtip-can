@@ -39,10 +39,12 @@ SOURCES += \
         ../protocol/scaleddecode.c \
         ../protocol/scaledencode.c \
         ../src/qtipcan.cpp \
+        ../src/qtipcanconnection.cpp \
         qtipcanplugin.cpp
 
 HEADERS += \
         ../inc/qtipcan.h \
+        ../inc/qtipcanconnection.h \
         ../inc/qtippacket.h \
         ../protocol/QTipProtocol.h \
         ../protocol/fielddecode.h \

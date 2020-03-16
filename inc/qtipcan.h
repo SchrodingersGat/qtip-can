@@ -31,7 +31,7 @@ SOFTWARE.
 #include <qtcpsocket.h>
 
 #include "qtippacket.h"
-
+#include "qtipcanconnection.h"
 
 
 class QTipCANDevice : public QCanBusDevice
@@ -52,7 +52,7 @@ public:
     int getPortNumber(void) const { return portNum; }
     void setPortNumber(int n) { portNum = n; }
 
-    static const int DEFAULT_PORT_NUM = 99999;
+    static const int DEFAULT_PORT_NUM = 13579;
 
 protected slots:
     void onNewConnection();
@@ -71,7 +71,7 @@ protected:
     QTcpServer server;
 
     //! List of connected socket objects
-    QList<QTcpSocket*> connections;
+    QList<QTipCANConnection*> connections;
 };
 
 #endif // QTIPCAN_H

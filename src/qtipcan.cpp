@@ -105,13 +105,13 @@ void QTipCANDevice::close()
  */
 void QTipCANDevice::onNewConnection()
 {
-    auto* connection = server.nextPendingConnection();
+    auto* socket= server.nextPendingConnection();
 
-    if (connection != nullptr)
+    if (socket != nullptr)
     {
-        connections.append(connection);
+        QTipCANConnection* connection = new QTipCANConnection(this, socket);
 
-        // TODO - Create a new connectionmanager object for tracking packets, etc
+        connections.append(connection);
     }
 
     flushConnections();
