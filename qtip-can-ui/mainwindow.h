@@ -17,6 +17,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void sendPacket();
+
 private:
     Ui::MainWindow *ui;
 

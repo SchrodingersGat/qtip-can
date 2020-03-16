@@ -15,6 +15,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
@@ -27,6 +28,7 @@ public:
     QWidget *centralWidget;
     QGridLayout *gridLayout;
     QPlainTextEdit *text;
+    QPushButton *sendPacket;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -35,7 +37,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(400, 300);
+        MainWindow->resize(400, 432);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         gridLayout = new QGridLayout(centralWidget);
@@ -47,6 +49,11 @@ public:
         text->setReadOnly(false);
 
         gridLayout->addWidget(text, 0, 0, 1, 1);
+
+        sendPacket = new QPushButton(centralWidget);
+        sendPacket->setObjectName(QString::fromUtf8("sendPacket"));
+
+        gridLayout->addWidget(sendPacket, 1, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
@@ -68,6 +75,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
+        sendPacket->setText(QCoreApplication::translate("MainWindow", "Send Test Packet", nullptr));
     } // retranslateUi
 
 };

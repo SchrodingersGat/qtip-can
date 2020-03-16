@@ -202,29 +202,17 @@ bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
 
     encodeQTIP_CANFramePacketStructure(&pkt, &qtipFrame);
 
+    bool result = false;
+
     for (auto* connection : connections)
     {
-        sendPacketToConnection(pkt, connection);
+        if (connection)
+        {
+            result |= connection->sendPacket(pkt);
+        }
     }
 
-    // TODO - Return success code
-    return true;
-}
-
-
-/**
- * @brief QTipCANDevice::sendPacketToConnection - Transmit packet to a single connected socket
- * @param pkt - reference to the packet being transmitted
- * @param connection - pointer to the socket connection
- */
-void QTipCANDevice::sendPacketToConnection(const QTIP_Packet_t &pkt, QTipCANConnection *connection)
-{
-    if (!connection || !connection->isOpen())
-    {
-        return;
-    }
-
-    connection->sendPacket(pkt);
+    return result;
 }
 
 
