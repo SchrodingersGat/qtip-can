@@ -52,10 +52,7 @@ QTipCANDevice::~QTipCANDevice()
 
     flushConnections();
 
-    for (auto *connection : connections)
-    {
-        if (connection) connection->close();
-    }
+    qDeleteAll(connections);
 
     QTipDebug() << "~QTipCANDevice()";
 }
@@ -96,13 +93,7 @@ bool QTipCANDevice::open()
  */
 void QTipCANDevice::close()
 {
-    for (auto* connection : connections)
-    {
-        if (connection && connection->isOpen())
-        {
-            connection->close();
-        }
-    }
+    flushConnections();
 
     qDeleteAll(connections);
 
@@ -132,6 +123,10 @@ void QTipCANDevice::onNewConnection()
 }
 
 
+/**
+ * @brief QTipCANDevice::onNewPacket - Called when a new complete packet is received from a connected socket
+ * @param packet
+ */
 void QTipCANDevice::onNewPacket(QTIP_Packet_t packet)
 {
     QTipDebug() << "QTipCANDevice::onNewPacket";
@@ -222,14 +217,14 @@ bool QTipCANDevice::writeFrame(const QCanBusFrame &frame)
  * @param pkt - reference to the packet being transmitted
  * @param connection - pointer to the socket connection
  */
-void QTipCANDevice::sendPacketToConnection(const QTIP_Packet_t &pkt, QTcpSocket *connection)
+void QTipCANDevice::sendPacketToConnection(const QTIP_Packet_t &pkt, QTipCANConnection *connection)
 {
     if (!connection || !connection->isOpen())
     {
         return;
     }
 
-    // TODO - Encode and send the packet...
+    connection->sendPacket(pkt);
 }
 
 

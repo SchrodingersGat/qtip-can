@@ -33,7 +33,7 @@ SOFTWARE.
 
 class QTipCANDevice;
 
-class QTipCANConnection : public QTcpSocket
+class QTipCANConnection : public QObject
 {
     Q_OBJECT
 
@@ -41,8 +41,10 @@ public:
     QTipCANConnection(QTipCANDevice *device, QTcpSocket *socket);
     virtual ~QTipCANConnection();
 
+    bool isOpen() { return socket && socket->isOpen(); }
+
 public slots:
-    bool sendPacket(QTIP_Packet_t &pkt);
+    bool sendPacket(const QTIP_Packet_t &pkt);
 
 signals:
     void packetReceived(QTIP_Packet_t pkt);

@@ -64,7 +64,7 @@ protected:
     virtual bool open() override;
     virtual void close() override;
 
-    void sendPacketToConnection(const QTIP_Packet_t &pkt, QTcpSocket* connection);
+    void sendPacketToConnection(const QTIP_Packet_t &pkt, QTipCANConnection* connection);
 
     //! Default port number
     int portNum;

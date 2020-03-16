@@ -28,15 +28,20 @@ SOFTWARE.
 #include "qtipdebug.h"
 
 
-QTipCANConnection::QTipCANConnection(QTipCANDevice *d, QTcpSocket *s) : QTcpSocket(), device(d), socket(s)
+/**
+ * @brief QTipCANConnection::QTipCANConnection - Create a new QTipCANConnection object
+ * @param d - pointer to the QTipCANDevice object
+ * @param s - pointer to the QTcpSocket object
+ */
+QTipCANConnection::QTipCANConnection(QTipCANDevice *d, QTcpSocket *s) : QObject(), device(d), socket(s)
 {
     connect(socket, SIGNAL(readyRead()), this, SLOT(onBytesAvailable()));
+    connect(socket, SIGNAL(disconnected()), device, SLOT(flushConnections()));
 
     connect(this, SIGNAL(packetReceived(QTIP_Packet_t)), device, SLOT(onNewPacket(QTIP_Packet_t)));
-    connect(this, SIGNAL(disconnected()), device, SLOT(flushConnections()));
 
     // Open the socket
-    open(OpenModeFlag::ReadWrite);
+    socket->open(QTcpSocket::OpenModeFlag::ReadWrite);
 
     QTipDebug() << "Creating new QTipCANConnection";
 }
@@ -46,20 +51,28 @@ QTipCANConnection::~QTipCANConnection()
 {
     QTipDebug() << "Deleting QTipCANConnection";
 
-    if (isOpen()) close();
+    if (socket->isOpen()) socket->close();
 }
 
 
-bool QTipCANConnection::sendPacket(QTIP_Packet_t &pkt)
+/**
+ * @brief QTipCANConnection::sendPacket - Serialize and transmit packet over this socket
+ * @param pkt - packet to transmit
+ * @return - true if the packet was successfully transmitted
+ */
+bool QTipCANConnection::sendPacket(const QTIP_Packet_t &pkt)
 {
     QByteArray bytes;
 
     // TODO - Encode the packet into the bytes
 
-    return write(bytes) == bytes.count();
+    return socket->write(bytes) == bytes.count();
 }
 
 
+/**
+ * @brief QTipCANConnection::onBytesAvailable - Called when new data are available
+ */
 void QTipCANConnection::onBytesAvailable()
 {
     auto bytes = socket->readAll();
@@ -68,6 +81,10 @@ void QTipCANConnection::onBytesAvailable()
 }
 
 
+/**
+ * @brief QTipCANConnection::parseData - Parse recently received data
+ * @param bytes
+ */
 void QTipCANConnection::parseData(QByteArray &bytes)
 {
     QTipDebug() << bytes;
