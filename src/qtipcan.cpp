@@ -130,6 +130,52 @@ void QTipCANDevice::onNewConnection()
 void QTipCANDevice::onNewPacket(QTIP_Packet_t packet)
 {
     QTipDebug() << "QTipCANDevice::onNewPacket";
+
+    QVector<QCanBusFrame> rxFrames;
+
+    QTIP_CANFrame_t qtipFrame;
+
+    if (decodeQTIP_CANFramePacketStructure(&packet, &qtipFrame))
+    {
+        QCanBusFrame frame;
+
+        // Copy payload
+        QByteArray payload;
+
+        for (int ii = 0; ii < qtipFrame.dlc; ii++)
+        {
+            payload.append((uint8_t) qtipFrame.data[ii]);
+        }
+
+        frame.setPayload(payload);
+
+        frame.setExtendedFrameFormat(qtipFrame.ext);
+
+        uint32_t id = qtipFrame.idLo;
+
+        if (qtipFrame.ext)
+        {
+            id |= ((uint32_t) qtipFrame.idHi << 16);
+        }
+
+        frame.setFrameId(id);
+
+        frame.setFrameType(static_cast<QCanBusFrame::FrameType>(qtipFrame.frameType));
+
+        if (qtipFrame.hasTimestamp)
+        {
+            // TODO - Implement frame timestamp here...
+            frame.setTimeStamp(QCanBusFrame::TimeStamp(0, 0));
+        }
+        else
+        {
+            frame.setTimeStamp(QCanBusFrame::TimeStamp(0, 0));
+        }
+
+        rxFrames.append(frame);
+
+        enqueueReceivedFrames(rxFrames);
+    }
 }
 
 
