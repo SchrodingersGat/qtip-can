@@ -1,0 +1,9 @@
+# Build files
+debug/
+release/
+Makefile*
+
+*.Debug
+*.Release
+*.stash
+*.user
